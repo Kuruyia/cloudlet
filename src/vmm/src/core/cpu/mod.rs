@@ -8,7 +8,7 @@ use std::convert::TryInto;
 use std::io;
 use std::sync::{Arc, Mutex};
 use std::{result, u64};
-use tracing::{event, Level};
+use tracing::{error, info, warn};
 use vm_memory::{Address, Bytes, GuestAddress, GuestMemoryError, GuestMemoryMmap};
 use vmm_sys_util::terminal::Terminal;
 
@@ -222,7 +222,7 @@ impl Vcpu {
             Ok(exit_reason) => match exit_reason {
                 // The VM stopped (Shutdown ot HLT).
                 VcpuExit::Shutdown | VcpuExit::Hlt => {
-                    event!(Level::INFO, ?exit_reason, "Guest shutdown. Bye!");
+                    info!(?exit_reason, "Guest shutdown. Bye!");
                     let stdin = io::stdin();
                     let stdin_lock = stdin.lock();
                     stdin_lock.set_canon_mode().unwrap();
@@ -247,12 +247,7 @@ impl Vcpu {
                             .unwrap();
                     }
                     _ => {
-                        event!(
-                            Level::WARN,
-                            address = addr,
-                            "Unsupported device write at {:x?}",
-                            addr
-                        );
+                        warn!(address = addr, "Unsupported device write at {:x?}", addr);
                     }
                 },
 
@@ -267,19 +262,14 @@ impl Vcpu {
                         );
                     }
                     _ => {
-                        event!(
-                            Level::WARN,
-                            address = addr,
-                            "Unsupported device read at {:x?}",
-                            addr
-                        );
+                        warn!(address = addr, "Unsupported device read at {:x?}", addr);
                     }
                 },
                 _ => {
-                    event!(Level::ERROR, ?exit_reason, "Unhandled VM-Exit");
+                    error!(?exit_reason, "Unhandled VM-Exit");
                 }
             },
-            Err(e) => event!(Level::ERROR, ?e, "Emulation error"),
+            Err(e) => error!(?e, "Emulation error"),
         }
     }
 }

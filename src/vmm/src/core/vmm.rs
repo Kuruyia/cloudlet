@@ -14,7 +14,7 @@ use std::os::unix::prelude::RawFd;
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 use std::thread;
-use tracing::{event, Level};
+use tracing::info;
 use vm_memory::{Address, GuestAddress, GuestMemory, GuestMemoryMmap, GuestMemoryRegion};
 use vmm_sys_util::terminal::Terminal;
 
@@ -156,7 +156,7 @@ impl VMM {
     /// Run all virtual CPUs.
     pub fn run(&mut self) -> Result<()> {
         for mut vcpu in self.vcpus.drain(..) {
-            event!(Level::INFO, vcpu_index = vcpu.index, "Starting vCPU");
+            info!(vcpu_index = vcpu.index, "Starting vCPU");
             let _ = thread::Builder::new().spawn(move || loop {
                 vcpu.run();
             });
