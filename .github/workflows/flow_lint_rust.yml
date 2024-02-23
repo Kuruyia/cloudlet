@@ -2,11 +2,6 @@ name: Lint Rust package
 
 on:
   workflow_call:
-    inputs:
-      directory:
-        description: "Directory to change to"
-        type: string
-        required: true
 
 env:
   CARGO_TERM_COLOR: always
@@ -14,11 +9,8 @@ env:
 jobs:
   lint:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ${{ inputs.directory }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         name: Checkout project
 
       - uses: dtolnay/rust-toolchain@stable
@@ -27,7 +19,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         name: Use cached dependencies and artifacts
 
-      - uses: arduino/setup-protoc@v2
+      - uses: arduino/setup-protoc@v3
         name: Install Protoc
 
       - name: Build the package
